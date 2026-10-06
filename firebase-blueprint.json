@@ -1,0 +1,273 @@
+{
+  "entities": {
+    "Employee": {
+      "title": "Employee",
+      "description": "Represents an employee in the system.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique uppercase employee ID (e.g., EMP-01)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the employee"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the employee (e.g., Nhân viên, Quản lý, Bếp)"
+        },
+        "hourlyRate": {
+          "type": "number",
+          "description": "Hourly rate in VND"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Date of employee record creation (YYYY-MM-DD)"
+        }
+      },
+      "required": ["id", "name", "role", "hourlyRate", "createdAt"]
+    },
+    "AttendanceLog": {
+      "title": "AttendanceLog",
+      "description": "Daily work hours log representing a shift worked by an employee.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique attendance log identifier"
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "ID of the employee"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of work (YYYY-MM-DD)"
+        },
+        "hoursWorked": {
+          "type": "number",
+          "description": "Hours worked in the shift"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["present", "late", "absent"],
+          "description": "Attendance status"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes or details about the shift"
+        },
+        "rateMultiplier": {
+          "type": "number",
+          "description": "Salary multiplier (e.g., 1.0, 1.5)"
+        },
+        "shiftId": {
+          "type": "string",
+          "description": "Optional ID of the pre-defined shift assigned"
+        }
+      },
+      "required": ["id", "employeeId", "date", "hoursWorked", "status", "rateMultiplier"]
+    },
+    "PayrollAdjustment": {
+      "title": "PayrollAdjustment",
+      "description": "Additional bonuses or penalties assigned to an employee.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique adjustment identifier"
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "ID of the employee"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of adjustment (YYYY-MM-DD)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount in VND"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["bonus", "penalty"],
+          "description": "Whether this is a bonus or a penalty"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for the adjustment"
+        }
+      },
+      "required": ["id", "employeeId", "date", "amount", "type", "reason"]
+    },
+    "Shift": {
+      "title": "Shift",
+      "description": "A pre-defined shift structure with grace period and progressive late penalty rules.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique shift ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the shift (e.g., Ca Sáng, Ca 10h)"
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Shift start time (HH:mm, e.g. 10:00)"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Shift end time (HH:mm, e.g. 18:00)"
+        },
+        "multiplier": {
+          "type": "number",
+          "description": "Rate multiplier (e.g., 1.0, 1.5)"
+        },
+        "earlyGraceMinutes": {
+          "type": "number",
+          "description": "Allowed early check-in grace minutes (no penalty if arriving early)"
+        },
+        "lateGraceMinutes": {
+          "type": "number",
+          "description": "Allowed late check-in grace minutes before penalty begins (default 10 min)"
+        },
+        "lateRate1": {
+          "type": "number",
+          "description": "Penalty rate per minute for <= 30 mins late (default 1000 VND)"
+        },
+        "lateRate2": {
+          "type": "number",
+          "description": "Penalty rate per minute for 31-60 mins late (default 2000 VND)"
+        },
+        "lateRate3": {
+          "type": "number",
+          "description": "Penalty rate per minute for >= 60 mins late (default 5000 VND)"
+        }
+      },
+      "required": ["id", "name", "multiplier"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Log of actions performed in the system.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique activity log ID"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of action"
+        },
+        "action": {
+          "type": "string",
+          "description": "Short action name"
+        },
+        "details": {
+          "type": "string",
+          "description": "Detailed description of action"
+        }
+      },
+      "required": ["id", "timestamp", "action", "details"]
+    },
+    "GratitudeMessage": {
+      "title": "GratitudeMessage",
+      "description": "A message of appreciation or gratitude shared between colleagues.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique message ID"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Employee ID or 'admin' of the sender"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Name of the sender (or 'Ẩn danh')"
+        },
+        "receiverName": {
+          "type": "string",
+          "description": "Name of the person being thanked"
+        },
+        "message": {
+          "type": "string",
+          "description": "The gratitude message content"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        }
+      },
+      "required": ["id", "senderId", "senderName", "receiverName", "message", "createdAt"]
+    },
+    "MusicTrack": {
+      "title": "MusicTrack",
+      "description": "A relaxing track added to the playlist by administrators.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the track"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the track"
+        },
+        "artist": {
+          "type": "string",
+          "description": "Artist or creator name"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["mp3", "youtube", "spotify", "upload"],
+          "description": "Source of the track"
+        },
+        "url": {
+          "type": "string",
+          "description": "Web URL of the track"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when the track was added"
+        }
+      },
+      "required": ["id", "title", "artist", "source", "url", "createdAt"]
+    }
+  },
+  "firestore": {
+    "employees": {
+      "schema": "Employee",
+      "description": "All employee profiles."
+    },
+    "attendance": {
+      "schema": "AttendanceLog",
+      "description": "Employee shift/attendance logs."
+    },
+    "adjustments": {
+      "schema": "PayrollAdjustment",
+      "description": "Bonus and penalty adjustments."
+    },
+    "shifts": {
+      "schema": "Shift",
+      "description": "Predefined workspace shifts."
+    },
+    "activities": {
+      "schema": "ActivityLog",
+      "description": "Audit trails for system actions."
+    },
+    "gratitude_wall": {
+      "schema": "GratitudeMessage",
+      "description": "Internal gratitude notes shared by team members."
+    },
+    "music_tracks": {
+      "schema": "MusicTrack",
+      "description": "List of relaxing music tracks managed by admins."
+    }
+  }
+}

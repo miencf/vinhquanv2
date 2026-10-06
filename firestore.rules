@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for data validation in Production
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isNonEmptyString(field) {
+      return request.resource.data[field] is string && request.resource.data[field].size() > 0;
+    }
+
+    function isPositiveNumber(field) {
+      return request.resource.data[field] is number && request.resource.data[field] >= 0;
+    }
+
+    // 1. Employees Collection
+    match /employees/{employeeId} {
+      allow read: if true;
+      allow create, update: if hasRequiredFields(['name', 'role', 'hourlyRate'])
+        && isNonEmptyString('name')
+        && isNonEmptyString('role')
+        && isPositiveNumber('hourlyRate');
+      allow delete: if true;
+    }
+
+    // 2. Attendance Logs Collection
+    match /attendance/{attendanceId} {
+      allow read: if true;
+      allow create, update: if hasRequiredFields(['employeeId', 'date', 'status'])
+        && isNonEmptyString('employeeId')
+        && isNonEmptyString('date')
+        && request.resource.data.status in ['present', 'late', 'absent'];
+      allow delete: if true;
+    }
+
+    // 3. Payroll Adjustments (Bonus / Penalty)
+    match /adjustments/{adjustmentId} {
+      allow read: if true;
+      allow create, update: if hasRequiredFields(['employeeId', 'date', 'amount', 'type', 'reason'])
+        && isNonEmptyString('employeeId')
+        && isNonEmptyString('date')
+        && isPositiveNumber('amount')
+        && request.resource.data.type in ['bonus', 'penalty']
+        && isNonEmptyString('reason');
+      allow delete: if true;
+    }
+
+    // 4. Shifts Collection
+    match /shifts/{shiftId} {
+      allow read: if true;
+      allow create, update: if hasRequiredFields(['name', 'multiplier'])
+        && isNonEmptyString('name')
+        && request.resource.data.multiplier is number;
+      allow delete: if true;
+    }
+
+    // 5. System Settings (GPS coordinates, Shift & Grace Policy)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if settingId in ['gps', 'shift_policy'];
+    }
+
+    // 6. System Activities Log
+    match /activities/{activityId} {
+      allow read: if true;
+      allow create: if hasRequiredFields(['timestamp', 'action', 'details'])
+        && isNonEmptyString('action');
+      allow update, delete: if true;
+    }
+
+    // 7. Gratitude Wall Messages
+    match /gratitude_wall/{messageId} {
+      allow read: if true;
+      allow create: if hasRequiredFields(['senderName', 'receiverName', 'message'])
+        && isNonEmptyString('message');
+      allow update, delete: if true;
+    }
+
+    // 8. Music Tracks
+    match /music_tracks/{trackId} {
+      allow read: if true;
+      allow create, update: if hasRequiredFields(['title', 'artist', 'url'])
+        && isNonEmptyString('title');
+      allow delete: if true;
+    }
+
+    // 9. Dismissed Auto Bonuses Tracking
+    match /dismissed_auto_bonuses/{bonusId} {
+      allow read, write: if true;
+    }
+
+    // 10. Connection test collection
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Default deny for all other paths not explicitly defined above (Production Security)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
